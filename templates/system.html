@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #e0e7ef;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        .header .logo {
+            display: flex;
+            align-items: center;
+        }
+        .header img {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+        .header .title {
+            font-size: 32px;
+            color: #007bff;
+        }
+        .nav {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        .nav a {
+            color: #000;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 10px 20px;
+            display: inline-block;
+        }
+        .nav a:hover, .nav a.active {
+            background-color: #4B8DDC;
+            color: #fff;
+            border-radius: 4px;
+        }
+        .content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-around;
+            align-items: stretch;
+            height: calc(60vh - 120px);
+            background-color: #e0e7ef;
+            padding-top: 40px;
+            padding-bottom: 150px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            height: 60%;
+            text-align: center;
+            width: 300px;
+            display: flex;
+            margin-top: 80px;
+            flex-direction: column;
+            justify-content: center; /* Centering vertically */
+            align-items: center; 
+        }
+        .card img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+        }
+        .card h3 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .upload-button {
+            display: inline-block;
+            padding: 10px;
+            background-color: #4b9df4;
+            color: #fff;
+            font-size: 18px;
+            border: none;
+            border-radius: 4px;
+            width: 50%;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 0 auto;
+        }
+        .upload-button:hover {
+            background-color: #0056b3;
+        }
+        .link-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .link-input input {
+            width: 80%;
+            padding: 10px;
+            font-size: 18px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .link-input button {
+            width: 50%;
+            padding: 10px;
+            background-color: #4b9df4;
+            color: #fff;
+            font-size: 18px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .link-input button:hover {
+            background-color: #0056b3;
+        }
+        button.btn {
+            padding: 10px 20px;
+            background-color: #ffffff;  /* Make the button background white */
+            color: #4b9df4;  /* Set the font color to blue */
+            font-size: 18px;
+            border: 2px solid #4b9df4;  /* Add a light blue border */
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 20px;
+            transition: background-color 0.3s, color 0.3s;  /* Smooth transition on hover */
+        }
+        
+        button.btn:hover {
+            background-color: #4b9df4; /* Change background color to blue on hover */
+            color: #ffffff;  /* Change text color to white on hover */
+        }
+
+        .progress-container {
+            width: 50%;
+            height: 20px;
+            background-color: #f3f3f3;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px auto 0;
+            display: none; /* Initially hidden */
+            margin-top: 30px;
+        }
+        .progress-bar {
+            height: 100%;
+            background-image: linear-gradient(45deg, #3c94f3, #0095ff);
+            width: 0;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+        }
+        .progress-text {
+            font-size: 20px;
+            color: #000;
+            display: none;
+            text-align: center;
+            margin-bottom: 5px; /* Adjust margin as needed */
+        }
+        .download-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #ffffff;
+            border: 2px solid #4b9df4;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #4b9df4;
+            text-decoration: none;
+            margin: 20px auto;
+            width: 200px;
+            text-align: center;
+        }
+        .download-button:hover {
+            background-color: #4b9df4;
+            color: #ffffff;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px;
+            width: 98.5%;
+            margin-top: auto;
+            background-color: #ffffff;
+            border-top: 1px solid #ddd;
+        }
+        .modal-dialog {
+            margin-top: 150px !important;  /* 调整这个值来改变模态框的位置 */
+        }
+        
+        #videoPreview {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            display: block;
+        }
+        #recordButton {
+            padding: 10px 20px;
+            background-color: #4b9df4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block; 
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="/static/icon/face_logo.png" alt="Logo">
+            <div class="title">Face Detection</div>
+        </div>
+        <div class="nav">
+            <a href="{% url 'home' %}" class="home-link">主页</a>
+            <a href="{% url 'system' %}" class="active">进入系统</a>
+            <a href="{% url 'about_us' %}" class="about-link">关于我们</a>
+        </div>
+    </div>
+    <div class="content">
+        <!-- First card with modal -->
+        <div class="card">
+            <img src="/static/icon/take_photo.png" alt="Collect Dataset">
+            <h3>采集用户人脸数据集</h3>
+            <p>通过摄像头采集<br>创建自定义数据集</p>
+            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#collectModal">进入采集</button>
+        </div>
+    
+        <!-- Second card with modal -->
+        <div class="card">
+            <img src="/static/icon/model_train.png" alt="Train Model">
+            <h3>训练模型</h3>
+            <p>训练深度学习模型<br>基于采集的数据</p>
+            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#trainModal">进入训练</button>
+        </div>
+    
+        <!-- Third card with modal -->
+        <div class="card">
+            <img src="/static/icon/model_test.png" alt="Test Model">
+            <h3>测试模型</h3>
+            <p>实时人脸检测<br>   </p>
+            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#testModal">进入测试</button>
+        </div>
+    </div>
+    <!-- Modal for Collect Dataset -->
+    <div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="collectModalLabel">采集用户人脸数据集</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div class="link-input" id="userNameInputDiv">
+                    <input type="text" id="userNameInput" placeholder="请输入您的姓名" required>
+              </div>
+            <!-- 视频预览框 -->
+            <video id="videoPreview" autoplay muted style="display: none;"></video>
+            <!-- 倒计时 -->
+            <div id="countdown" style="display: none;">3</div>
+            <!-- 拍摄照片按钮 -->
+            <button id="recordButton" class="btn" style="display: none;">拍摄照片</button>
+            <!-- 显示已拍摄照片数量 -->
+            <div id="photoCount" style="display: none;">已拍摄照片: 0 / 10</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Train Model -->
+    <div class="modal fade" id="trainModal" tabindex="-1" aria-labelledby="trainModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="trainModalLabel">训练模型</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>正在处理并训练模型，请稍候...</p>
+            <!-- 添加进度条 -->
+            <div class="progress-container">
+              <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+            <div id="trainingResult"></div> <!-- 用于显示训练结果 -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="testModal" tabindex="-1" aria-labelledby="testModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="testModalLabel">实时人脸识别</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Video preview for live stream -->
+            <video id="testVideoPreview" autoplay muted style="width: 100%; height: 100%;object-fit: contain;"></video>
+            <!-- Canvas for drawing bounding boxes around detected faces -->
+            <canvas id="canvasOverlay" style="position: absolute; top: 0; left: 0; pointer-events: none;"></canvas>
+            <!-- Result message to show recognition status -->
+            <div id="resultMessage" style="margin-top: 20px; font-size: 18px;">识别中...</div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal for Custom Messages -->
+    <div id="myModal" class="modal" style="display:none; position: fixed; z-index: 1050; padding-top: 100px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+        <div class="modal-content" style="background-color: #fff; margin: auto; padding: 20px; border: 1px solid #888; width: 30%;">
+            <span class="close" style="color: #aaa; float: right; font-size: 28px; font-weight: bold;">&times;</span>
+            <p id="modalMessage" style="font-size: 18px; text-align: center;">这里是模态框消息</p>
+        </div>
+    </div>
+
+
+    <script>
+        let mediaRecorder;
+        let recordedChunks = [];
+        let photoCount = 0; // 记录已拍摄照片数量
+        const maxPhotos = 10; // 最大拍摄数量
+        let isCountdownRunning = false; // 防止倒计时重复触发
+
+        // Function to show modal message
+        function showModal(message) {
+            const modal = document.getElementById("myModal");
+            const modalMessage = document.getElementById("modalMessage");
+            modalMessage.innerText = message;
+            modal.style.display = "block";
+            const span = document.getElementsByClassName("close")[0];
+            span.onclick = function () {
+                modal.style.display = "none";
+            };
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+        }
+
+        // Function to start the model training when user clicks the "Train Model" button
+        function startModelTraining() {
+            const progressBar = document.getElementById('progressBar');
+            let progress = 0;
+
+            const progressInterval = setInterval(() => {
+                if (progress < 100) {
+                    progress += 10;
+                    progressBar.style.width = `${progress}%`;
+                    progressBar.innerText = `${progress}%`;
+                } else {
+                    clearInterval(progressInterval);
+                    console.log('开始发送模型训练请求');
+                    fetch('/process_and_train/', {
+                        method: 'POST',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('模型训练响应:', data);
+                        if (data.message) {
+                            const trainingResult = document.getElementById('trainingResult');
+                            trainingResult.innerHTML = `<p>${data.message}</p>`;
+                        } else if (data.error) {
+                            showModal(data.error);
+                        }
+                        setTimeout(() => {
+                            const trainModal = new bootstrap.Modal(document.getElementById('trainModal'));
+                            trainModal.hide(); // 关闭模态框
+                        }, 2000);
+                    })
+                    .catch(error => {
+                        console.error('模型训练失败:', error);
+                        showModal('模型训练失败');
+                    });
+                }
+            }, 500);  // 每500ms更新一次进度
+        }
+
+        // 启动摄像头
+        async function startCamera() {
+            const videoPreview = document.getElementById('videoPreview');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoPreview.srcObject = stream;
+                videoPreview.style.display = "block";
+                return stream;
+            } catch (error) {
+                console.error('摄像头启动失败:', error);
+                alert('无法启动摄像头');
+            }
+        }
+
+        // 处理用户输入的姓名
+        function handleUserNameInput(event) {
+            if (event.key === 'Enter') {
+                const userName = document.getElementById('userNameInput').value.trim();
+                if (userName) {
+                    // 隐藏姓名输入框并显示视频预览框
+                    document.getElementById('userNameInput').style.display = 'none';
+                    document.getElementById('videoPreview').style.display = 'block';
+                    document.getElementById('countdown').style.display = 'block'; // 显示倒计时
+                    document.getElementById('recordButton').style.display = 'block'; // 显示拍摄按钮
+                    document.getElementById('photoCount').style.display = 'block';
+                    // 启动摄像头
+                    startCamera(document.getElementById('videoPreview'));
+                    // 等待 3 秒钟后开始拍摄
+                    startCountdownAndCapture();
+                } else {
+                    alert('请输入您的姓名');
+                }
+            }
+        }
+
+        // 拍摄照片并上传
+        function capturePhoto(videoElement) {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            // 获取用户输入的姓名
+            const userName = document.getElementById('userNameInput').value.trim();
+            if (!userName) {
+                alert('请输入您的姓名');
+                return;
+            }
+            console.log(canvas.toDataURL());
+            // 模拟将画布转换为图片并上传
+            canvas.toBlob((blob) => {
+                const formData = new FormData();
+                const photoFileName = `${photoCount + 1}.jpg`;  // 使用1-10的命名规则
+                formData.append('photo', blob, photoFileName);
+                formData.append('userName', userName);
+
+                // 模拟上传照片
+                fetch('/save_photo/', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('照片上传成功:', data.message);
+                    updatePhotoCount(); // 更新照片数量
+                })
+                .catch(error => {
+                    console.error('上传照片失败:', error);
+                });
+            }, 'image/jpeg');
+        }
+
+        // 更新拍摄照片数量并检查是否已拍满
+        function updatePhotoCount() {
+            photoCount++;
+            document.getElementById('photoCount').innerText = `已拍摄照片: ${photoCount} / ${maxPhotos}`;
+
+            // 拍满 10 张后禁用按钮
+            if (photoCount >= maxPhotos) {
+                const recordButton = document.getElementById('recordButton');
+                recordButton.classList.add('disabled');
+                recordButton.disabled = true;
+                recordButton.innerText = '已拍满10张照片';
+                const trainButton = document.querySelector('[data-bs-target="#trainModal"]');
+                trainButton.classList.remove('disabled');  // 移除禁用类
+                trainButton.disabled = false;  // 启用按钮
+                console.log('训练按钮已启用');
+            }
+        }
+
+        // 倒计时逻辑并拍摄照片
+        function startCountdownAndCapture() {
+            // 防止多次触发倒计时
+            if (isCountdownRunning) return;
+            isCountdownRunning = true;
+            const videoPreview = document.getElementById('videoPreview');
+            const countdownElement = document.getElementById('countdown');
+            let countdown = 3;
+
+            // 显示倒计时
+            countdownElement.style.display = 'block';
+            countdownElement.innerText = countdown;
+
+            const countdownInterval = setInterval(() => {
+                countdown -= 1;
+                countdownElement.innerText = countdown;
+
+                if (countdown === 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.style.display = 'none';
+
+                    // 拍摄照片
+                    capturePhoto(videoPreview);
+                    isCountdownRunning = false;
+                }
+            }, 1000); // 每秒更新一次倒计时
+        }
+
+        // 启动实时测试摄像头
+        async function startTestCamera() {
+            const testVideoPreview = document.getElementById('testVideoPreview');
+            const canvasOverlay = document.getElementById('canvasOverlay');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                testVideoPreview.srcObject = stream;
+                testVideoPreview.play();
+                videoPreview.onloadedmetadata = () => {
+                    console.log('Video Width:', videoPreview.videoWidth);
+                    console.log('Video Height:', videoPreview.videoHeight);
+                };
+                // 等待视频加载完成后获取宽高
+                testVideoPreview.onloadedmetadata = () => {
+                    testVideoPreview.width = testVideoPreview.videoWidth;
+                    testVideoPreview.height = testVideoPreview.videoHeight;
+
+                    // 设置 canvas 的宽高与视频一致
+                    canvasOverlay.width = testVideoPreview.videoWidth;
+                    canvasOverlay.height = testVideoPreview.videoHeight;
+
+                    // 开始实时人脸识别
+                    const ctx = canvasOverlay.getContext('2d');
+                    startFaceRecognition(testVideoPreview, ctx);
+                };
+
+                console.log('测试摄像头已启动');
+                return stream;
+            } catch (error) {
+                console.error('摄像头启动失败:', error);
+                alert('无法启动摄像头进行测试');
+            }
+        }
+        // 停止摄像头
+        function stopCamera() {
+            const testVideoPreview = document.getElementById('testVideoPreview');
+            const stream = testVideoPreview.srcObject;
+
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach((track) => track.stop());
+                testVideoPreview.srcObject = null;
+            }
+
+            console.log('摄像头已停止');
+        }
+
+        // 实时人脸识别逻辑
+        async function startFaceRecognition(videoElement, ctx) {
+            const processFrame = async () => {
+                // 使用 canvas 获取当前视频帧
+                const canvas = document.createElement('canvas');
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                const canvasCtx = canvas.getContext('2d');
+                canvasCtx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+                // 将图像数据发送给后端进行人脸识别
+                const formData = new FormData();
+                canvas.toBlob(async (blob) => {
+                    formData.append('image', blob, 'frame.jpg');
+
+                    try {
+                        const response = await fetch('/process_frame/', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result = await response.json();
+
+                        // 清空画布并绘制新的识别结果
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        // 如果识别到了人脸，画框并显示识别结果
+                        if (result.success && result.faceData) {
+                            const faceData = result.faceData;
+                            faceData.forEach(face => {
+                                const scaleX = canvas.width / videoElement.videoWidth;
+                                const scaleY = canvas.height / videoElement.videoHeight;
+                            
+                                const x = face.x * scaleX;
+                                const y = face.y * scaleY;
+                                const width = face.width * scaleX;
+                                const height = face.height * scaleY;
+                                ctx.beginPath();
+                                ctx.rect(x, y, width, height);
+                                ctx.lineWidth = 3;
+                                ctx.strokeStyle = 'red';
+                                ctx.stroke();
+
+                                ctx.fillStyle = 'red';
+                                ctx.font = '18px Arial';
+                                ctx.fillText(face.name, x, y - 10);
+                            });
+                        }
+                    } catch (error) {
+                        console.error('识别请求失败:', error);
+                    }
+                }, 'image/jpeg');
+            };
+
+            setInterval(processFrame, 500);
+        }
+        // 监听用户输入姓名并进行后续操作
+        document.addEventListener('DOMContentLoaded', function() {
+            const userNameInput = document.getElementById('userNameInput');
+            userNameInput.addEventListener('keyup', handleUserNameInput);
+
+            const recordButton = document.getElementById('recordButton');
+            recordButton.addEventListener('click', () => {
+                if (photoCount < maxPhotos) {
+                    startCountdownAndCapture();  // 点击按钮开始倒计时拍照
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const collectModal = document.getElementById('collectModal');
+            const trainButton = document.querySelector('[data-bs-target="#trainModal"]');
+            trainButton.disabled = true;
+
+            if (collectModal) {
+                collectModal.addEventListener('shown.bs.modal', async () => {
+                    await startCamera();  // 模态框显示时启动摄像头
+                });
+            }
+
+            if (trainButton) {
+                trainButton.disabled = false;  // 初始时禁用训练按钮，直到拍满10张照片
+                trainButton.addEventListener('click', () => {
+                    console.log('训练模型按钮点击');
+                    startModelTraining();  // 关闭采集模态框，打开训练模态框
+                });
+            }
+
+            const testRecordButton = document.getElementById('testRecordButton');
+            const testModal = document.getElementById('testModal');
+
+            testModal.addEventListener('shown.bs.modal', async () => {
+                await startTestCamera();  // 启动摄像头用于测试
+            });
+
+            if (testRecordButton) {
+                testRecordButton.addEventListener('click', () => {
+                    startTestCountdownAndCapture();  // 开始测试拍照流程
+                });
+            }
+        });
+        // 添加事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            const testModal = document.getElementById('testModal');
+
+            // 动态人脸识别部分
+            testModal.addEventListener('shown.bs.modal', async () => {
+                const testVideoPreview = document.getElementById('testVideoPreview');
+                await startTestCamera(testVideoPreview); // 启动摄像头
+            });
+
+            testModal.addEventListener('hidden.bs.modal', () => {
+                stopCamera(); // 停止摄像头
+            });
+        });
+    </script>
+
+    <div class="footer">
+        &copy; 2024 Face Detection. All rights reserved.
+    </div>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Bundle JS (包括Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+    
+</body>
+</html>

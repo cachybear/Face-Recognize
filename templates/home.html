@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .header .logo {
+            display: flex;
+            align-items: center;
+        }
+        .header img {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+        .header .title {
+            font-size: 32px;
+            color: #007bff;
+        }
+        .nav {
+            display: flex;
+            align-items: center;
+        }
+        .nav a {
+            color: #000;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 10px 20px;
+            display: inline-block;
+        }
+        .nav a:hover, .nav a.active {
+            background-color: #4B8DDC;
+            color: #fff;
+            border-radius: 4px;
+        }
+        .content {
+            padding: 40px 20px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section-title span {
+            display: inline-block;
+            background-color: #89bbf1;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
+        .services, .advantages {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            background-color: #ffffff;
+            padding: 40px 20px;
+            gap: 20px;
+        }
+        .service-box, .advantage-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 20%;
+            height: 40%;
+            text-align: center;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Align items to the start */
+            align-items: center;
+        }
+        .service-box img, .advantage-box img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+        .service-box h3, .advantage-box h3 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .service-box ul, .advantage-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1; /* Allow list to grow */
+            color: #333; /* Set font color */
+        }
+        .service-box ul li, .advantage-box ul li {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .core-advantages {
+            width: 95%;
+            background-color: #f9f9f9;
+            padding: 40px 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .core-advantages h2 {
+            font-size: 28px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="/static/icon/face_logo.png" alt="Logo">
+            <div class="title">Face Detection</div>
+        </div>
+        <div class="nav">
+            <a href="{% url 'home' %}" class="active">主页</a>
+            <a href="{% url 'system' %}" class="ana-link">进入系统</a>
+            <a href="{% url 'about_us' %}" class="about-link">关于我们</a>
+        </div>
+    </div>
+
+    
+    <div class="content">
+        <!-- Title section for services -->
+        <div class="section-title">
+            <span>应用功能</span>
+        </div>
+        <!-- Updated service sections for traditional and new facial detection methods -->
+        <div class="services">
+            <div class="service-box">
+                <img src="/static/icon/facial_detection.png" alt="人脸检测">
+                <h3>基础人脸检测</h3>
+                <ul>
+                    <li>Haar级联分类器检测</li>
+                    <li>LBP纹理特征检测</li>
+                </ul>
+            </div>
+            <div class="service-box">
+                <img src="/static/icon/deep_learning.png" alt="深度学习人脸检测">
+                <h3>深度学习人脸检测</h3>
+                <ul>
+                    <li>MTCNN多任务检测</li>
+                    <li>FaceNet嵌入向量识别</li>
+                </ul>
+            </div>
+            <div class="service-box">
+                <img src="/static/icon/feature_analysis.png" alt="特征分析">
+                <h3>面部特征分析</h3>
+                <ul>
+                    <li>面部特征点定位</li>
+                    <li>表情与姿态分析</li>
+                </ul>
+            </div>
+            <div class="service-box">
+                <img src="/static/icon/report.png" alt="报告生成">
+                <h3>检测报告生成</h3>
+                <ul>
+                    <li>检测结果可视化</li>
+                    <li>详细报告导出</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const navLinks = document.querySelectorAll('.nav a');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
