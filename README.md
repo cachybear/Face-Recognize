@@ -7,7 +7,7 @@ Python 3.6
 TensorFlow 1.7
 
 Django: (ensure the latest version compatible with Python 3.6 and TensorFlow 1.7)
-## DataSet
+## Dataset
 ORL Database of Faces
 ## Contact
 If you have any questions, feel free to contact us at: jun_wan2003@163.com
